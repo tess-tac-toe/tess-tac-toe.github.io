@@ -31,9 +31,7 @@
 
 <body>
     <script>
-        let n = 4, nowX = true;
-
-        function table({ item = (i, j) => "", name = "main", prefix = "m" }) {
+        function table({ n, item = (i, j) => "", name = "main", prefix = "m" }) {
             const body = new Array(n).fill().map((_, i) => {
                 return "<tr>" + new Array(n).fill().map((_, j) =>
                     `<td class="${name}" id="${prefix}_${i}_${j}">${item(i, j)}</td>`).join("") + "</tr>";
@@ -42,21 +40,62 @@
             return `<table class="${name}"><tbody>${body}</tbody></table>`
         }
 
-        document.body.innerHTML = table({ item: (i, j) => table({ name: "inner", prefix: `i_${i}_${j}` }) });
+        function render(n) {
+            document.body.innerHTML = table({ n, item: (i, j) => table({ n, name: "inner", prefix: `i_${i}_${j}` }) });
+            let cells = new Array(n ** 4).fill();
 
-        let cells = new Array(n ** 4).fill();
-
-        const map = { "": 0n, "X": 1n, "O": 2n }, letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
-        for (let i = 0; i < n; i++) {
-            for (let j = 0; j < n; j++) {
-                for (let k = 0; k < n; k++) {
-                    for (let l = 0; l < n; l++) {
-                        cells[i + n * (j + n * (k + n * l))] = document.getElementById(`i_${i}_${j}_${k}_${l}`);
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    for (let k = 0; k < n; k++) {
+                        for (let l = 0; l < n; l++) {
+                            cells[i + n * (j + n * (k + n * l))] = document.getElementById(`i_${i}_${j}_${k}_${l}`);
+                        }
                     }
                 }
             }
+
+            return cells;
         }
+
+        function getChecks(n) {
+            let options = ["u", "d"].concat(new Array(n).fill().map((_, i) => i)), checks = [];
+
+            for (let o1 of options) {
+                for (let o2 of options) {
+                    for (let o3 of options) {
+                        for (let o4 of options) {
+                            let check = []
+                            for (let i = 0; i < n; i++) {
+                                let [a, b, c, d] = [o1, o2, o3, o4].map(v => {
+                                    if (v === "u") { return i; }
+                                    if (v === "d") { return n - 1 - i; }
+                                    return v;
+                                });
+                                let posId = a + n * (b + n * (c + n * d));
+                                check.push(posId);
+                            }
+                            if (new Set(check).size === n) { checks.push(check); }
+                        }
+                    }
+                }
+            }
+
+            return checks;
+        }
+
+        function checkWinner() {
+            let x = checks.find(ids => ids.every(id => cells[id].innerText === "X"));
+            if (x) {
+                alert("X wins: " + x);
+            }
+
+            let o = checks.find(ids => ids.every(id => cells[id].innerText === "O"));
+            if (o) {
+                alert("O wins: " + o);
+            }
+        }
+
+        let n = 4, nowX = true, cells = render(n), checks = getChecks(n);
 
         document.addEventListener("click", ({ target }) => {
             if (target.tagName !== "TD") { return; }
@@ -64,34 +103,10 @@
 
             target.innerText = nowX ? 'X' : 'O';
             nowX = !nowX;
-            updateHref();
+            checkWinner();
         });
 
-        function updateHref() {
-            let encoded = 0n, encText = "";
 
-            for (let i = 0; i < cells.length; i++) {
-                encoded = 3n * encoded + map[cells[i].innerText];
-            }
-
-            while (encoded !== 0n) {
-                let value = encoded % 62n;
-                encoded = (encoded - value) / 62n;
-                encText = letters[value] + encText;
-            }
-
-            location.hash = "#" + n + ":" + encText;
-        }
-
-        function readHref() {
-            let text = location.hash.slice(3), decoded = 0n;
-
-            for (let i = 0; i < text.length; i++) {
-                let val = letters.indexOf(item = text[i]);
-                if (val === -1) { return; }
-                decoded = decoded * 62n + BigInt(val);
-            }
-        }
 
 
     </script>
