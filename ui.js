@@ -1,10 +1,13 @@
 function table({ item = () => "", name = "main", prefix = "m" }) {
-    const body = new Array(N).fill().map((_, i) => {
-        return "<tr>" + new Array(N).fill().map((_, j) =>
-            `<td class="${name}" id="${prefix}_${i}_${j}">${item(i, j)}</td>`).join("") + "</tr>";
-    }).join("");
+    const createRow = (_, rowIndex) => {
+        const createCell = (_, colIndex) =>
+            `<td class="${name}" id="${prefix}_${rowIndex}_${colIndex}">${item(rowIndex, colIndex)}</td>`;
 
-    return `<table class="${name}"><tbody>${body}</tbody></table>`
+        return `<tr>${Array.from({ length: N }, createCell).join("")}</tr>`;
+    };
+
+    const body = Array.from({ length: N }, createRow).join("");
+    return `<table class="${name}"><tbody>${body}</tbody></table>`;
 }
 
 function render() {
@@ -14,10 +17,9 @@ function render() {
 
     document.body.innerHTML = "Turn along plane: " + buttons.join(" ") + "<br/>" +
         table({ item: (i, j) => table({ name: "inner", prefix: `i_${i}_${j}` }) });
+
     let cells = new Array(N ** 4);
-
     iterate((i, j, k, l) => cells[vec2id([i, j, k, l])] = document.getElementById(`i_${i}_${j}_${k}_${l}`));
-
     return cells;
 }
 
@@ -36,3 +38,6 @@ function onClick({ target }) {
         document.removeEventListener("click", onClick);
     }
 }
+
+const cells = render();
+document.addEventListener("click", onClick);

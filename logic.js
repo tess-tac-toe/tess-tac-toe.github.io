@@ -59,7 +59,6 @@ function getChecks() {
     return checks;
 }
 
-
 function checkWinner(opt) {
     if (winner) { return; }
     let ids = checks.find(ids => ids.every(id => cells[id].innerText === opt));
@@ -68,7 +67,6 @@ function checkWinner(opt) {
     winner = opt;
     winningCells = ids;
 }
-
 
 function play(id, isX) {
     if (winner) { return console.error("Game ended"); }
@@ -81,7 +79,6 @@ function play(id, isX) {
     checkWinner('X');
     checkWinner('O');
 }
-
 
 function findBestFor(isX) {
     const player = isX ? "X" : "O", opponent = isX ? "O" : "X";
