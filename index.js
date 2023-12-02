@@ -107,27 +107,40 @@ function play(id, isX) {
     checkWinner('O');
 }
 
-function aiPlay() {
-    const suitable = checks.filter(ids => ids.every(id => cells[id].innerText !== "X"));
-    console.log("Suitable count ", suitable.length);
-    const stats = suitable.map(ids => ({ ids, count: ids.filter(id => cells[id].innerText === "O").length }));
+function findBestFor(isX) {
+    const player = isX ? "X" : "O", opponent = isX ? "O" : "X";
+    const suitable = checks.filter(ids => ids.every(id => cells[id].innerText !== opponent));
+    const stats = suitable.map(ids => ({ ids, count: ids.filter(id => cells[id].innerText === player).length }));
 
-    if (stats.length === 0) {
-        console.log("No suitable, exit");
-        return;
-    }
+    if (stats.length === 0) { return null; }
 
     const max = Math.max(...stats.map(e => e.count)),
-        opts = stats.filter(e => e.count === max),
-        optIds = opts[Math.floor(Math.random() * opts.length)].ids,
-        emptyIds = optIds.filter(id => cells[id].innerText === "");
+        opts = stats.filter(e => e.count === max);
 
-    if (emptyIds.length === 0) {
-        console.log("No suitable, exit");
+    if (max === n) { return null; }
+
+    return opts[Math.floor(Math.random() * opts.length)];
+}
+
+function aiPlay(isX) {
+    const suitableForMe = findBestFor(isX), suitableForOpponent = findBestFor(!isX);
+
+    if (!suitableForMe && !suitableForOpponent) {
+        console.error("No suitable for each player, game ended");
         return;
     }
 
-    const chosenId = emptyIds[Math.floor(Math.random() * emptyIds.length)];
+    let chosen;
+
+    if (!suitableForMe || (suitableForOpponent && suitableForOpponent.count === n - 1)) {
+        chosen = suitableForOpponent.ids;
+    } else {
+        chosen = suitableForMe.ids;
+    }
+
+    const emptyIds = chosen.filter(id => cells[id].innerText === ""),
+        chosenId = emptyIds[Math.floor(Math.random() * emptyIds.length)];
+
     play(chosenId, false);
 }
 
@@ -136,7 +149,7 @@ function onClick({ target }) {
     if (id === -1) { return; }
 
     play(id, true);
-    aiPlay();
+    aiPlay(false);
 
     if (winner) {
         winningCells.forEach(id => cells[id].style.background = "lightgray");
