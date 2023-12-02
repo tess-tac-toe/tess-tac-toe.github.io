@@ -31,6 +31,9 @@
 
 <body>
     <script>
+        // https://tic-tac-tess.github.io/
+        // tic-tac-toe on tesseract (4 dimension cube)
+
         function table({ n, item = (i, j) => "", name = "main", prefix = "m" }) {
             const body = new Array(n).fill().map((_, i) => {
                 return "<tr>" + new Array(n).fill().map((_, j) =>
@@ -95,19 +98,21 @@
             }
         }
 
-        let n = 4, nowX = true, cells = render(n), checks = getChecks(n);
-
-        document.addEventListener("click", ({ target }) => {
+        function onClick({ target }) {
             if (target.tagName !== "TD") { return; }
             if (target.innerText !== "") { return; }
 
             target.innerText = nowX ? 'X' : 'O';
             nowX = !nowX;
             checkWinner();
-        });
+        }
 
+        function click(cellId) {
+            onClick({ target: cells[cellId] });
+        }
 
-
+        let n = 4, nowX = true, cells = render(n), checks = getChecks(n);
+        document.addEventListener("click", onClick);
 
     </script>
 </body>
