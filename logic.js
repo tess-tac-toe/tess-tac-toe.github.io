@@ -38,15 +38,9 @@ function getChecks() {
 
     function addCheck(opts) {
         if (opts.every(opt => typeof opt === "number")) { return; }
-        let check = [];
 
-        for (let i = 0; i < N; i++) {
-            check.push(vec2id(opts.map(v => {
-                if (v === "u") { return i; }
-                if (v === "d") { return N - 1 - i; }
-                return v;
-            })));
-        }
+        const check = Array.from({ length: N }, (_, i) =>
+            opts.map(v => v === "u" ? i : v === "d" ? N - 1 - i : v)).map(vec2id);
 
         checks.push(check);
     }
