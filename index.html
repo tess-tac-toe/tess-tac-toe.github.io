@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <style>
+        table.inner {
+            border-collapse: collapse;
+            border: 2px solid #000;
+        }
+
+        td.inner {
+            border: 1px solid #000;
+
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+
+            padding: 3px;
+            font-size: 30px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        td.main {
+            padding: 7px;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        let n = 4, nowX = true;
+
+        function table({ item = (i, j) => "", name = "main", prefix = "m" }) {
+            const body = new Array(n).fill().map((_, i) => {
+                return "<tr>" + new Array(n).fill().map((_, j) =>
+                    `<td class="${name}" id="${prefix}_${i}_${j}">${item(i, j)}</td>`).join("") + "</tr>";
+            }).join("");
+
+            return `<table class="${name}"><tbody>${body}</tbody></table>`
+        }
+
+        document.body.innerHTML = table({ item: (i, j) => table({ name: "inner", prefix: `i_${i}_${j}` }) });
+
+        let cells = new Array(n ** 4).fill();
+
+        const map = { "": 0n, "X": 1n, "O": 2n }, letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                for (let k = 0; k < n; k++) {
+                    for (let l = 0; l < n; l++) {
+                        cells[i + n * (j + n * (k + n * l))] = document.getElementById(`i_${i}_${j}_${k}_${l}`);
+                    }
+                }
+            }
+        }
+
+        document.addEventListener("click", ({ target }) => {
+            if (target.tagName !== "TD") { return; }
+            if (target.innerText !== "") { return; }
+
+            target.innerText = nowX ? 'X' : 'O';
+            nowX = !nowX;
+            updateHref();
+        });
+
+        function updateHref() {
+            let encoded = 0n, encText = "";
+
+            for (let i = 0; i < cells.length; i++) {
+                encoded = 3n * encoded + map[cells[i].innerText];
+            }
+
+            while (encoded !== 0n) {
+                let value = encoded % 62n;
+                encoded = (encoded - value) / 62n;
+                encText = letters[value] + encText;
+            }
+
+            location.hash = "#" + n + ":" + encText;
+        }
+
+        function readHref() {
+            let text = location.hash.slice(3), decoded = 0n;
+
+            for (let i = 0; i < text.length; i++) {
+                let val = letters.indexOf(item = text[i]);
+                if (val === -1) { return; }
+                decoded = decoded * 62n + BigInt(val);
+            }
+        }
+
+
+    </script>
+</body>
+
+</html>
