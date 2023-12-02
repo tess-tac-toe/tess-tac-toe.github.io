@@ -1,43 +1,21 @@
 // tic-tac-toe on tesseract (4 dimension cube)
-const n = 4;
 
-function table({ item = () => "", name = "main", prefix = "m" }) {
-    const body = new Array(n).fill().map((_, i) => {
-        return "<tr>" + new Array(n).fill().map((_, j) =>
-            `<td class="${name}" id="${prefix}_${i}_${j}">${item(i, j)}</td>`).join("") + "</tr>";
-    }).join("");
-
-    return `<table class="${name}"><tbody>${body}</tbody></table>`
-}
+let nowX = true, winner, winningCells, checks = getChecks();
 
 function vec2id([i, j, k, l]) {
-    return i + n * (j + n * (k + n * l));
+    return i + N * (j + N * (k + N * l));
 }
 
 function iterate(callback) {
-    for (let i = 0; i < n; i++)
-        for (let j = 0; j < n; j++)
-            for (let k = 0; k < n; k++)
-                for (let l = 0; l < n; l++)
+    for (let i = 0; i < N; i++)
+        for (let j = 0; j < N; j++)
+            for (let k = 0; k < N; k++)
+                for (let l = 0; l < N; l++)
                     callback(i, j, k, l);
 }
 
-function render() {
-    const axis = 'XYZW';
-    const buttons = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]]
-        .map(([a, b]) => `<button onclick="turn(${a}, ${b})">${axis[a]}${axis[b]}-axis</button>`)
-
-    document.body.innerHTML = "Turn along plane: " + buttons.join(" ") + "<br/>" +
-        table({ n, item: (i, j) => table({ n, name: "inner", prefix: `i_${i}_${j}` }) });
-    let cells = new Array(n ** 4);
-
-    iterate((i, j, k, l) => cells[vec2id([i, j, k, l])] = document.getElementById(`i_${i}_${j}_${k}_${l}`));
-
-    return cells;
-}
-
 function turn(a, b) {
-    let values = new Array(n ** 4), backgrounds = new Array(n ** 4);
+    let values = new Array(N ** 4), backgrounds = new Array(N ** 4);
 
     iterate((i, j, k, l) => {
         const fromVec = [i, j, k, l], from = vec2id(fromVec), toVec = [i, j, k, l];
@@ -55,23 +33,21 @@ function turn(a, b) {
     }
 }
 
-
-
-function getChecks(n) {
-    const options = ["u", "d", ...Array.from({ length: n }, (_, i) => i)], checks = [];
+function getChecks() {
+    const options = ["u", "d", ...Array.from({ length: N }, (_, i) => i)], checks = [];
 
     function addCheck(opts) {
         let check = [];
 
-        for (let i = 0; i < n; i++) {
+        for (let i = 0; i < N; i++) {
             check.push(vec2id(opts.map(v => {
                 if (v === "u") { return i; }
-                if (v === "d") { return n - 1 - i; }
+                if (v === "d") { return N - 1 - i; }
                 return v;
             })));
         }
 
-        if (new Set(check).size === n) { checks.push(check); }
+        if (new Set(check).size === N) { checks.push(check); }
     }
 
     for (let o1 of options)
@@ -83,6 +59,7 @@ function getChecks(n) {
     return checks;
 }
 
+
 function checkWinner(opt) {
     if (winner) { return; }
     let ids = checks.find(ids => ids.every(id => cells[id].innerText === opt));
@@ -91,6 +68,7 @@ function checkWinner(opt) {
     winner = opt;
     winningCells = ids;
 }
+
 
 function play(id, isX) {
     if (winner) { return console.error("Game ended"); }
@@ -104,6 +82,7 @@ function play(id, isX) {
     checkWinner('O');
 }
 
+
 function findBestFor(isX) {
     const player = isX ? "X" : "O", opponent = isX ? "O" : "X";
     const suitable = checks.filter(ids => ids.every(id => cells[id].innerText !== opponent));
@@ -114,7 +93,7 @@ function findBestFor(isX) {
     const max = Math.max(...stats.map(e => e.count)),
         opts = stats.filter(e => e.count === max);
 
-    if (max === n) { return null; }
+    if (max === N) { return null; }
 
     return opts[Math.floor(Math.random() * opts.length)];
 }
@@ -129,7 +108,7 @@ function aiPlay(isX) {
 
     let chosen;
 
-    if (!suitableForMe || (suitableForOpponent && suitableForOpponent.count === n - 1)) {
+    if (!suitableForMe || (suitableForOpponent && suitableForOpponent.count === N - 1)) {
         chosen = suitableForOpponent.ids;
     } else {
         chosen = suitableForMe.ids;
@@ -140,23 +119,3 @@ function aiPlay(isX) {
 
     play(chosenId, false);
 }
-
-function onClick({ target }) {
-    const id = cells.indexOf(target);
-    if (id === -1) { return; }
-
-    play(id, true);
-    aiPlay(false);
-
-    if (winner) {
-        winningCells.forEach(id => cells[id].style.background = "lightgray");
-        document.removeEventListener("click", onClick);
-    } else if (!nowX) {
-        cells.forEach(cell => cell.style.background = "lightgray");
-        document.removeEventListener("click", onClick);
-    }
-}
-
-let nowX = true, winner, winningCells, cells = render(n), checks = getChecks(n);
-
-document.addEventListener("click", onClick);
