@@ -37,6 +37,7 @@ function getChecks() {
     const options = ["u", "d", ...Array.from({ length: N }, (_, i) => i)], checks = [];
 
     function addCheck(opts) {
+        if (opts.every(opt => typeof opt === "number")) { return; }
         let check = [];
 
         for (let i = 0; i < N; i++) {
@@ -47,7 +48,7 @@ function getChecks() {
             })));
         }
 
-        if (new Set(check).size === N) { checks.push(check); }
+        checks.push(check);
     }
 
     for (let o1 of options)
@@ -72,6 +73,7 @@ function play(id, isX) {
     if (winner) { return console.error("Game ended"); }
     if (nowX !== isX) { return console.error("Player mismatch"); }
     if (!cells[id]) { return console.error("Bad cell " + id); }
+    if (cells[id].innerText) { return console.error("Already set"); }
 
     cells[id].innerText = nowX ? 'X' : 'O';
     nowX = !nowX;
