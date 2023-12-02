@@ -1,8 +1,7 @@
-const n = 4;
-// https://tess-tac-toe.github.io/
 // tic-tac-toe on tesseract (4 dimension cube)
+const n = 4;
 
-function table({ n, item = (i, j) => "", name = "main", prefix = "m" }) {
+function table({ item = () => "", name = "main", prefix = "m" }) {
     const body = new Array(n).fill().map((_, i) => {
         return "<tr>" + new Array(n).fill().map((_, j) =>
             `<td class="${name}" id="${prefix}_${i}_${j}">${item(i, j)}</td>`).join("") + "</tr>";
@@ -16,19 +15,15 @@ function vec2id([i, j, k, l]) {
 }
 
 function iterate(callback) {
-    for (let i = 0; i < n; i++) {
-        for (let j = 0; j < n; j++) {
-            for (let k = 0; k < n; k++) {
-                for (let l = 0; l < n; l++) {
+    for (let i = 0; i < n; i++)
+        for (let j = 0; j < n; j++)
+            for (let k = 0; k < n; k++)
+                for (let l = 0; l < n; l++)
                     callback(i, j, k, l);
-                }
-            }
-        }
-    }
 }
 
-function render(n) {
-    const axis = 'XYZD';
+function render() {
+    const axis = 'XYZW';
     const buttons = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]]
         .map(([a, b]) => `<button onclick="turn(${a}, ${b})">${axis[a]}${axis[b]}-axis</button>`)
 
@@ -60,28 +55,30 @@ function turn(a, b) {
     }
 }
 
-function getChecks(n) {
-    let options = ["u", "d"].concat(new Array(n).fill().map((_, i) => i)), checks = [];
 
-    for (let o1 of options) {
-        for (let o2 of options) {
-            for (let o3 of options) {
-                for (let o4 of options) {
-                    let check = []
-                    for (let i = 0; i < n; i++) {
-                        let [a, b, c, d] = [o1, o2, o3, o4].map(v => {
-                            if (v === "u") { return i; }
-                            if (v === "d") { return n - 1 - i; }
-                            return v;
-                        });
-                        let posId = a + n * (b + n * (c + n * d));
-                        check.push(posId);
-                    }
-                    if (new Set(check).size === n) { checks.push(check); }
-                }
-            }
+
+function getChecks(n) {
+    const options = ["u", "d", ...Array.from({ length: n }, (_, i) => i)], checks = [];
+
+    function addCheck(opts) {
+        let check = [];
+
+        for (let i = 0; i < n; i++) {
+            check.push(vec2id(opts.map(v => {
+                if (v === "u") { return i; }
+                if (v === "d") { return n - 1 - i; }
+                return v;
+            })));
         }
+
+        if (new Set(check).size === n) { checks.push(check); }
     }
+
+    for (let o1 of options)
+        for (let o2 of options)
+            for (let o3 of options)
+                for (let o4 of options)
+                    addCheck([o1, o2, o3, o4]);
 
     return checks;
 }
