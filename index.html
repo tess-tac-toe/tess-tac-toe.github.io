@@ -31,7 +31,7 @@
 
 <body>
     <script>
-        // https://tic-tac-tess.github.io/
+        // https://tess-tac-toe.github.io/
         // tic-tac-toe on tesseract (4 dimension cube)
 
         function table({ n, item = (i, j) => "", name = "main", prefix = "m" }) {
@@ -86,34 +86,54 @@
             return checks;
         }
 
-        function checkWinner() {
-            let x = checks.find(ids => ids.every(id => cells[id].innerText === "X"));
-            if (x) {
-                alert("X wins: " + x);
-            }
+        function checkWinner(opt) {
+            if (winner) { return; }
+            let ids = checks.find(ids => ids.every(id => cells[id].innerText === "X"));
+            if (!ids) { return; }
 
-            let o = checks.find(ids => ids.every(id => cells[id].innerText === "O"));
-            if (o) {
-                alert("O wins: " + o);
-            }
+            winner = opt;
+            winningCells = ids;
+        }
+
+        function play(id, isX) {
+            checkWinner('X');
+            checkWinner('O');
+
+            if (winner) { return console.error("Game ended"); }
+            if (nowX !== isX) { return console.error("Player mismatch"); }
+            if (!cells[id]) { return console.error("Bad cell " + id); }
+
+            cells[id].innerText = nowX ? 'X' : 'O';
+            nowX = !nowX;
+        }
+
+        function aiPlay() {
+            const stats = checks.map(ids => ({ ids, count: ids.filter(id => cells[id].innerText === "O").length })),
+                max = Math.max(...stats.map(e => e.count)),
+                opts = stats.filter(e => e.count === max),
+                optIds = opts[Math.floor(Math.random() * opts.length)].ids,
+                emptyIds = optIds.filter(id => cells[id].innerText === ""),
+                chosenId = emptyIds[Math.floor(Math.random() * emptyIds.length)];
+
+            play(chosenId, false);
         }
 
         function onClick({ target }) {
-            if (target.tagName !== "TD") { return; }
-            if (target.innerText !== "") { return; }
+            const id = cells.indexOf(target);
+            if (id === -1) { return; }
 
-            target.innerText = nowX ? 'X' : 'O';
-            nowX = !nowX;
-            checkWinner();
+            play(id, true);
+            aiPlay();
+
+            if (winner) {
+                winningCells.forEach(id => cells[id].style.background = "lightgray");
+                document.removeEventListener("click", onClick);
+            }
         }
 
-        function click(cellId) {
-            onClick({ target: cells[cellId] });
-        }
+        let n = 4, nowX = true, winner, winningCells, cells = render(n), checks = getChecks(n);
 
-        let n = 4, nowX = true, cells = render(n), checks = getChecks(n);
         document.addEventListener("click", onClick);
-
     </script>
 </body>
 
