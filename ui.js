@@ -26,21 +26,18 @@ function render() {
 function onClick({ target }) {
     const id = cells.indexOf(target);
     if (id === -1) { return; }
-    let winner;
+    let end;
 
     play(id, true);
-    winner = checkWinner('X');
+    end = getStats(getValues()).end;
 
-    if (!winner) {
+    if (!end) {
         aiPlay(false);
-        winner = checkWinner('O');
+        end = getStats(getValues()).end;
     }
 
-    if (winner) {
-        winner.ids.forEach(id => cells[id].style.background = "lightgray");
-        document.removeEventListener("click", onClick);
-    } else if (!nowX) {
-        cells.forEach(cell => cell.style.background = "lightgray");
+    if (end) {
+        end.forEach(id => cells[id].style.background = "lightgray");
         document.removeEventListener("click", onClick);
     }
 }

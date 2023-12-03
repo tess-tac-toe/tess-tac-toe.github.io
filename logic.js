@@ -1,3 +1,4 @@
+// https://github.com/tess-tac-toe/tess-tac-toe.github.io
 // tic-tac-toe on tesseract (4 dimension cube)
 
 let nowX = true;
@@ -56,12 +57,32 @@ function getSets(values = getValues()) {
     return sets;
 }
 
-function checkWinner(opt) {
-    const sets = getSets(), checks = [...sets.X, ...sets.O];
-    let ids = checks.find(ids => ids.every(id => cells[id].innerText === opt));
-    if (!ids) { return null; }
+function getStats(values = getValues()) {
+    let sets = getSets(values), bestX = null, bestO = null, end = null;
 
-    return { winner: opt, ids };
+    for (let ids of sets.X) {
+        let count = ids.filter(id => values[id] === "X").length;
+        if (!bestX || bestX.count < count) {
+            bestX = { ids, count };
+        }
+    }
+
+    for (let ids of sets.O) {
+        let count = ids.filter(id => values[id] === "O").length;
+        if (!bestO || bestO.count < count) {
+            bestO = { ids, count };
+        }
+    }
+
+    if (bestX?.count === N) {
+        end = bestX.ids;
+    } else if (bestO?.count === N) {
+        end = bestO.ids;
+    } else if (!bestX && !bestO) {
+        end = Array.from({ length: N ** 4 }, (_, i) => i);
+    }
+
+    return { sets, bestX, bestO, end };
 }
 
 function play(id, isX) {
