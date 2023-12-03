@@ -10,7 +10,7 @@ function swap(key) {
     }
 }
 
-function table({ item = () => "", name = "main", prefix = "m" }) {
+function makeTable({ item = () => "", name = "main", prefix = "m" }) {
     const createRow = (_, rowIndex) => {
         const createCell = (_, colIndex) =>
             `<td class="${name}" id="${prefix}_${rowIndex}_${colIndex}">${item(rowIndex, colIndex)}</td>`;
@@ -23,8 +23,10 @@ function table({ item = () => "", name = "main", prefix = "m" }) {
 }
 
 function render() {
-    document.body.innerHTML = Object.keys(SWAPS).map(key => `<button onclick="swap('${key}')">Swap ${key}</button>`).join(" ") + "<br/>" +
-        table({ item: (i, j) => table({ name: "inner", prefix: `i_${i}_${j}` }) });
+    const buttons = Object.keys(SWAPS).map(key => `<button onclick="swap('${key}')">Swap ${key}</button>`).join(""),
+        table = makeTable({ item: (i, j) => makeTable({ name: "inner", prefix: `i_${i}_${j}` }) });
+
+    document.body.innerHTML = `<center><div>${buttons}</div>${table}</center>`;
 
     let cells = new Array(N ** 4);
     forEachVec(([i, j, k, l]) => cells[vec2id([i, j, k, l])] = document.getElementById(`i_${i}_${j}_${k}_${l}`));
