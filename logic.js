@@ -1,66 +1,38 @@
 // https://github.com/tess-tac-toe/tess-tac-toe.github.io
 // tic-tac-toe on tesseract (4 dimension cube)
 
-let nowX = true;
+function getStats(values = getValues()) {
+    let xOptions = Array.from({ length: N }, () => ([])),
+        oOptions = Array.from({ length: N }, () => ([])),
+        stalled = true;
+
+    for (let ids of CHECKS) {
+        let counts = { "X": 0, "O": 0, "": 0 }, options = ids.map(id => values[id] === "");
+        ids.forEach(id => counts[values[id]]++);
+
+        if (counts.X === N) { return { winner: "X", highlight: ids }; }
+        if (counts.O === N) { return { winner: "O", highlight: ids }; }
+
+        if (counts.X >= 0 && counts.O === 0) { xOptions[counts.X].push(options); stalled = false; }
+        if (counts.X === 0 && counts.O >= 0) { oOptions[counts.O].push(options); stalled = false; }
+    }
+
+    if (stalled) { return { winner: "stalled", highlight: Array.from({ length: SIZE }, (_, i) => i) }; }
+    return { xOptions, oOptions };
+}
+
+
+// Old AI
 
 function getSets(values = getValues()) {
-    const options = ["u", "d", ...Array.from({ length: N }, (_, i) => i)],
-        sets = { "X": [], "O": [], "OX": [], "": [] };
+    const sets = { "X": [], "O": [], "OX": [], "": [] };
 
-    function addCheck(opts) {
-        if (opts.every(opt => typeof opt === "number")) { return; }
-
-        const ids = Array.from({ length: N }, (_, i) =>
-            opts.map(v => v === "u" ? i : v === "d" ? N - 1 - i : v)).map(vec2id);
-
+    CHECKS.forEach(ids => {
         const key = Array.from(new Set(ids.map(id => values[id]))).sort().join("");
         sets[key].push(ids);
-    }
-
-    for (let o1 of options)
-        for (let o2 of options)
-            for (let o3 of options)
-                for (let o4 of options)
-                    addCheck([o1, o2, o3, o4]);
+    });
 
     return sets;
-}
-
-function getStats(values = getValues()) {
-    let sets = getSets(values), bestX = null, bestO = null, end = null;
-
-    for (let ids of sets.X) {
-        let count = ids.filter(id => values[id] === "X").length;
-        if (!bestX || bestX.count < count) {
-            bestX = { ids, count };
-        }
-    }
-
-    for (let ids of sets.O) {
-        let count = ids.filter(id => values[id] === "O").length;
-        if (!bestO || bestO.count < count) {
-            bestO = { ids, count };
-        }
-    }
-
-    if (bestX?.count === N) {
-        end = bestX.ids;
-    } else if (bestO?.count === N) {
-        end = bestO.ids;
-    } else if (!bestX && !bestO) {
-        end = Array.from({ length: N ** 4 }, (_, i) => i);
-    }
-
-    return { sets, bestX, bestO, end };
-}
-
-function play(id, isX) {
-    if (nowX !== isX) { return console.error("Player mismatch"); }
-    if (!cells[id]) { return console.error("Bad cell " + id); }
-    if (cells[id].innerText) { return console.error("Already set"); }
-
-    cells[id].innerText = nowX ? 'X' : 'O';
-    nowX = !nowX;
 }
 
 function findBestFor(isX) {
@@ -98,5 +70,5 @@ function aiPlay(isX) {
     const emptyIds = chosen.filter(id => cells[id].innerText === ""),
         chosenId = emptyIds[Math.floor(Math.random() * emptyIds.length)];
 
-    play(chosenId, false);
+    return chosenId;
 }

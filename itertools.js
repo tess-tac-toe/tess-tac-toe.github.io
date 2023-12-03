@@ -1,7 +1,7 @@
 // https://github.com/tess-tac-toe/tess-tac-toe.github.io
 // tic-tac-toe on tesseract (4 dimension cube)
 
-const N = 4, SIZE = N ** 4;
+const N = 4, SIZE = N ** 4, SWAPS = buildSwaps(), CHECKS = buildChecks();
 
 function vec2id([i, j, k, l]) {
     return i + N * (j + N * (k + N * l));
@@ -54,5 +54,3 @@ function buildChecks() {
 
     return checks;
 }
-
-const SWAPS = buildSwaps(), CHECKS = buildChecks();

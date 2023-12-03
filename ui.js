@@ -31,27 +31,43 @@ function render() {
     return cells;
 }
 
-function onClick({ target }) {
-    const id = cells.indexOf(target);
-    if (id === -1) { return; }
-    let end;
+function getValues() {
+    return cells.map(cell => cell.innerText);
+}
 
-    play(id, true);
-    end = getStats(getValues()).end;
-
-    if (!end) {
-        aiPlay(false);
-        end = getStats(getValues()).end;
+function play(id, player) {
+    if (typeof id !== "number" || id < 0 || id >= SIZE) {
+        return console.error("Invalid id");
     }
 
-    if (end) {
-        end.forEach(id => cells[id].style.background = "lightgray");
+    if (cells[id].innerText !== "") {
+        return console.error("Already set");
+    }
+
+    const values = getValues(),
+        xCount = values.filter(v => v === "X").length,
+        oCount = values.filter(v => v === "O").length;
+
+    if (!((player === "X" && xCount === oCount) || (player === "O" && xCount === oCount + 1))) {
+        return console.error("Player mismatch");
+    }
+
+    cells[id].innerText = player;
+
+    const stats = getStats(getValues());
+
+    if (stats.winner) {
+        stats.highlight.forEach(id => cells[id].style.background = "lightgray");
         document.removeEventListener("click", onClick);
     }
 }
 
-function getValues() {
-    return cells.map(cell => cell.innerText);
+function onClick({ target }) {
+    const id = cells.indexOf(target);
+    if (id === -1) { return; }
+
+    play(id, "X");
+    play(aiPlay(), "O");
 }
 
 const cells = render();
