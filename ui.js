@@ -65,3 +65,5 @@ function onClick({ target }) {
 
 const cells = render();
 document.addEventListener("click", onClick);
+
+navigator?.serviceWorker?.register('/sw.js');
