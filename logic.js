@@ -7,7 +7,7 @@ function getStats(values = getValues()) {
         stalled = true;
 
     for (let ids of CHECKS) {
-        let counts = { "X": 0, "O": 0, "": 0 }, options = ids.map(id => values[id] === "");
+        let counts = { "X": 0, "O": 0, "": 0 }, options = ids.filter(id => values[id] === "");
         ids.forEach(id => counts[values[id]]++);
 
         if (counts.X === N) { return { winner: "X", highlight: ids }; }
@@ -18,57 +18,21 @@ function getStats(values = getValues()) {
     }
 
     if (stalled) { return { winner: "stalled", highlight: Array.from({ length: SIZE }, (_, i) => i) }; }
-    return { xOptions, oOptions };
+    return { "X": xOptions, "O": oOptions };
 }
 
+function aiPlay(player) {
+    const opponent = player === "X" ? "O" : "X", values = getValues(), stats = getStats(values);
+    if (stats.winner) { return; }
 
-// Old AI
-
-function getSets(values = getValues()) {
-    const sets = { "X": [], "O": [], "OX": [], "": [] };
-
-    CHECKS.forEach(ids => {
-        const key = Array.from(new Set(ids.map(id => values[id]))).sort().join("");
-        sets[key].push(ids);
-    });
-
-    return sets;
-}
-
-function findBestFor(isX) {
-    const player = isX ? "X" : "O", opponent = isX ? "O" : "X";
-    const sets = getSets(), checks = [...sets.X, ...sets.O, ...sets.OX, ...sets['']];
-    const suitable = checks.filter(ids => ids.every(id => cells[id].innerText !== opponent));
-    const stats = suitable.map(ids => ({ ids, count: ids.filter(id => cells[id].innerText === player).length }));
-
-    if (stats.length === 0) { return null; }
-
-    const max = Math.max(...stats.map(e => e.count)),
-        opts = stats.filter(e => e.count === max);
-
-    if (max === N) { return null; }
-
-    return opts[Math.floor(Math.random() * opts.length)];
-}
-
-function aiPlay(isX) {
-    const suitableForMe = findBestFor(isX), suitableForOpponent = findBestFor(!isX);
-
-    if (!suitableForMe && !suitableForOpponent) {
-        console.error("No suitable for each player, game ended");
-        return;
+    if (stats[opponent][N - 1].length > 0) {
+        return stats[opponent][N - 1][0][0];
     }
 
-    let chosen;
-
-    if (!suitableForMe || (suitableForOpponent && suitableForOpponent.count === N - 1)) {
-        chosen = suitableForOpponent.ids;
-    } else {
-        chosen = suitableForMe.ids;
+    for (let i = N - 1; i > 0; i--) {
+        if (stats[player][i].length === 0) { continue; }
+        return stats[player][i][0][0];
     }
 
-    const emptyIds = chosen.filter(id => cells[id].innerText === ""),
-        chosenId = emptyIds[Math.floor(Math.random() * emptyIds.length)];
-
-    return chosenId;
+    return values.map((v, i) => ({ v, i })).find(({ v }) => v === "").i;
 }

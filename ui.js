@@ -37,7 +37,7 @@ function getValues() {
 
 function play(id, player) {
     if (typeof id !== "number" || id < 0 || id >= SIZE) {
-        return console.error("Invalid id");
+        return console.error("Invalid id ", id);
     }
 
     if (cells[id].innerText !== "") {
@@ -67,7 +67,7 @@ function onClick({ target }) {
     if (id === -1) { return; }
 
     play(id, "X");
-    play(aiPlay(), "O");
+    play(aiPlay("O"), "O");
 }
 
 const cells = render();
