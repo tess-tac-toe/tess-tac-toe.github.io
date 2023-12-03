@@ -1,6 +1,6 @@
 // tic-tac-toe on tesseract (4 dimension cube)
 
-let nowX = true, winner, winningCells, checks = getChecks();
+let nowX = true;
 
 function vec2id([i, j, k, l]) {
     return i + N * (j + N * (k + N * l));
@@ -14,7 +14,7 @@ function iterate(callback) {
                     callback(i, j, k, l);
 }
 
-function turn(a, b) {
+function swap(a, b) {
     let values = new Array(N ** 4), backgrounds = new Array(N ** 4);
 
     iterate((i, j, k, l) => {
@@ -33,16 +33,18 @@ function turn(a, b) {
     }
 }
 
-function getChecks() {
-    const options = ["u", "d", ...Array.from({ length: N }, (_, i) => i)], checks = [];
+function getSets(values = getValues()) {
+    const options = ["u", "d", ...Array.from({ length: N }, (_, i) => i)],
+        sets = { "X": [], "O": [], "OX": [], "": [] };
 
     function addCheck(opts) {
         if (opts.every(opt => typeof opt === "number")) { return; }
 
-        const check = Array.from({ length: N }, (_, i) =>
+        const ids = Array.from({ length: N }, (_, i) =>
             opts.map(v => v === "u" ? i : v === "d" ? N - 1 - i : v)).map(vec2id);
 
-        checks.push(check);
+        const key = Array.from(new Set(ids.map(id => values[id]))).sort().join("");
+        sets[key].push(ids);
     }
 
     for (let o1 of options)
@@ -51,33 +53,29 @@ function getChecks() {
                 for (let o4 of options)
                     addCheck([o1, o2, o3, o4]);
 
-    return checks;
+    return sets;
 }
 
 function checkWinner(opt) {
-    if (winner) { return; }
+    const sets = getSets(), checks = [...sets.X, ...sets.O];
     let ids = checks.find(ids => ids.every(id => cells[id].innerText === opt));
-    if (!ids) { return; }
+    if (!ids) { return null; }
 
-    winner = opt;
-    winningCells = ids;
+    return { winner: opt, ids };
 }
 
 function play(id, isX) {
-    if (winner) { return console.error("Game ended"); }
     if (nowX !== isX) { return console.error("Player mismatch"); }
     if (!cells[id]) { return console.error("Bad cell " + id); }
     if (cells[id].innerText) { return console.error("Already set"); }
 
     cells[id].innerText = nowX ? 'X' : 'O';
     nowX = !nowX;
-
-    checkWinner('X');
-    checkWinner('O');
 }
 
 function findBestFor(isX) {
     const player = isX ? "X" : "O", opponent = isX ? "O" : "X";
+    const sets = getSets(), checks = [...sets.X, ...sets.O, ...sets.OX, ...sets['']];
     const suitable = checks.filter(ids => ids.every(id => cells[id].innerText !== opponent));
     const stats = suitable.map(ids => ({ ids, count: ids.filter(id => cells[id].innerText === player).length }));
 

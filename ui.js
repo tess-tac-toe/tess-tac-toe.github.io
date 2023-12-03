@@ -13,9 +13,9 @@ function table({ item = () => "", name = "main", prefix = "m" }) {
 function render() {
     const axis = 'XYZW';
     const buttons = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]]
-        .map(([a, b]) => `<button onclick="turn(${a}, ${b})">${axis[a]}${axis[b]}-axis</button>`)
+        .map(([a, b]) => `<button onclick="swap(${a}, ${b})">Swap ${axis[a]}${axis[b]}</button>`)
 
-    document.body.innerHTML = "Turn along plane: " + buttons.join(" ") + "<br/>" +
+    document.body.innerHTML = buttons.join(" ") + "<br/>" +
         table({ item: (i, j) => table({ name: "inner", prefix: `i_${i}_${j}` }) });
 
     let cells = new Array(N ** 4);
@@ -26,17 +26,27 @@ function render() {
 function onClick({ target }) {
     const id = cells.indexOf(target);
     if (id === -1) { return; }
+    let winner;
 
     play(id, true);
-    aiPlay(false);
+    winner = checkWinner('X');
+
+    if (!winner) {
+        aiPlay(false);
+        winner = checkWinner('O');
+    }
 
     if (winner) {
-        winningCells.forEach(id => cells[id].style.background = "lightgray");
+        winner.ids.forEach(id => cells[id].style.background = "lightgray");
         document.removeEventListener("click", onClick);
     } else if (!nowX) {
         cells.forEach(cell => cell.style.background = "lightgray");
         document.removeEventListener("click", onClick);
     }
+}
+
+function getValues() {
+    return cells.map(cell => cell.innerText);
 }
 
 const cells = render();
