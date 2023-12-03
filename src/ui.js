@@ -1,6 +1,3 @@
-// https://github.com/tess-tac-toe/tess-tac-toe.github.io
-// tic-tac-toe on tesseract (4 dimension cube)
-
 function swap(key) {
     const states = SWAPS[key].map(id => ({ text: cells[id].innerText, color: cells[id].style.background }));
 
@@ -24,12 +21,12 @@ function makeTable({ item = () => "", name = "main", prefix = "m" }) {
 
 function render() {
     const buttons = Object.keys(SWAPS).map(key => `<button onclick="swap('${key}')">Swap ${key}</button>`).join(""),
-        table = makeTable({ item: (i, j) => makeTable({ name: "inner", prefix: `i_${i}_${j}` }) });
+        table = makeTable({ item: (x, y) => makeTable({ name: "inner", prefix: `i_${x}_${y}` }) });
 
     document.body.innerHTML = `<center><div>${buttons}</div>${table}</center>`;
 
     let cells = new Array(N ** 4);
-    forEachVec(([i, j, k, l]) => cells[vec2id([i, j, k, l])] = document.getElementById(`i_${i}_${j}_${k}_${l}`));
+    forEachVec(([x, y, z, w]) => cells[vec2id([x, y, z, w])] = document.getElementById(`i_${x}_${y}_${z}_${w}`));
     return cells;
 }
 

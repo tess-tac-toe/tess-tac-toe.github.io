@@ -1,6 +1,3 @@
-// https://github.com/tess-tac-toe/tess-tac-toe.github.io
-// tic-tac-toe on tesseract (4 dimension cube)
-
 function play(id, player) {
     if (typeof id !== "number" || id < 0 || id >= SIZE) {
         return console.error("Invalid id ", id);

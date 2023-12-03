@@ -1,18 +1,15 @@
-// https://github.com/tess-tac-toe/tess-tac-toe.github.io
-// tic-tac-toe on tesseract (4 dimension cube)
-
 const N = 4, SIZE = N ** 4, SWAPS = buildSwaps(), CHECKS = buildChecks();
 
-function vec2id([i, j, k, l]) {
-    return i + N * (j + N * (k + N * l));
+function vec2id([x, y, z, w]) {
+    return x + N * (y + N * (z + N * w));
 }
 
 function forEachVec(callback) {
-    for (let i = 0; i < N; i++)
-        for (let j = 0; j < N; j++)
-            for (let k = 0; k < N; k++)
-                for (let l = 0; l < N; l++)
-                    callback([i, j, k, l]);
+    for (let x = 0; x < N; x++)
+        for (let y = 0; y < N; y++)
+            for (let z = 0; z < N; z++)
+                for (let w = 0; w < N; w++)
+                    callback([x, y, z, w]);
 }
 
 function buildSwaps() {
@@ -21,8 +18,8 @@ function buildSwaps() {
     for (let [a, b] of pairs) {
         const swap = swaps[axes[a] + axes[b]] = new Array(SIZE);
 
-        forEachVec(([i, j, k, l]) => {
-            const fromVec = [i, j, k, l], toVec = [i, j, k, l];
+        forEachVec(([x, y, z, w]) => {
+            const fromVec = [x, y, z, w], toVec = [x, y, z, w];
 
             toVec[a] = fromVec[b];
             toVec[b] = fromVec[a];
@@ -31,7 +28,10 @@ function buildSwaps() {
         });
     }
 
-    return swaps;
+    const XY2ZW = new Array(SIZE);
+    forEachVec(([x, y, z, w]) => XY2ZW[vec2id([x, y, z, w])] = vec2id([z, w, x, y]));
+
+    return { XY2ZW, ...swaps };
 }
 
 function buildChecks() {
