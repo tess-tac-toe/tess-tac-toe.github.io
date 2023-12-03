@@ -1,3 +1,15 @@
+// https://github.com/tess-tac-toe/tess-tac-toe.github.io
+// tic-tac-toe on tesseract (4 dimension cube)
+
+function swap(key) {
+    const states = SWAPS[key].map(id => ({ text: cells[id].innerText, color: cells[id].style.background }));
+
+    for (let i = 0; i < SIZE; i++) {
+        cells[i].innerText = states[i].text;
+        cells[i].style.background = states[i].color;
+    }
+}
+
 function table({ item = () => "", name = "main", prefix = "m" }) {
     const createRow = (_, rowIndex) => {
         const createCell = (_, colIndex) =>
@@ -11,15 +23,11 @@ function table({ item = () => "", name = "main", prefix = "m" }) {
 }
 
 function render() {
-    const axis = 'XYZW';
-    const buttons = [[0, 1], [0, 2], [0, 3], [1, 2], [1, 3], [2, 3]]
-        .map(([a, b]) => `<button onclick="swap(${a}, ${b})">Swap ${axis[a]}${axis[b]}</button>`)
-
-    document.body.innerHTML = buttons.join(" ") + "<br/>" +
+    document.body.innerHTML = Object.keys(SWAPS).map(key => `<button onclick="swap('${key}')">Swap ${key}</button>`).join(" ") + "<br/>" +
         table({ item: (i, j) => table({ name: "inner", prefix: `i_${i}_${j}` }) });
 
     let cells = new Array(N ** 4);
-    iterate((i, j, k, l) => cells[vec2id([i, j, k, l])] = document.getElementById(`i_${i}_${j}_${k}_${l}`));
+    forEachVec(([i, j, k, l]) => cells[vec2id([i, j, k, l])] = document.getElementById(`i_${i}_${j}_${k}_${l}`));
     return cells;
 }
 

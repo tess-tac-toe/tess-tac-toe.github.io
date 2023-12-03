@@ -3,37 +3,6 @@
 
 let nowX = true;
 
-function vec2id([i, j, k, l]) {
-    return i + N * (j + N * (k + N * l));
-}
-
-function iterate(callback) {
-    for (let i = 0; i < N; i++)
-        for (let j = 0; j < N; j++)
-            for (let k = 0; k < N; k++)
-                for (let l = 0; l < N; l++)
-                    callback(i, j, k, l);
-}
-
-function swap(a, b) {
-    let values = new Array(N ** 4), backgrounds = new Array(N ** 4);
-
-    iterate((i, j, k, l) => {
-        const fromVec = [i, j, k, l], from = vec2id(fromVec), toVec = [i, j, k, l];
-        toVec[a] = fromVec[b];
-        toVec[b] = fromVec[a];
-        const to = vec2id(toVec);
-
-        values[to] = cells[from].innerText;
-        backgrounds[to] = cells[from].style.background;
-    });
-
-    for (let i = 0; i < cells.length; i++) {
-        cells[i].innerText = values[i];
-        cells[i].style.background = backgrounds[i];
-    }
-}
-
 function getSets(values = getValues()) {
     const options = ["u", "d", ...Array.from({ length: N }, (_, i) => i)],
         sets = { "X": [], "O": [], "OX": [], "": [] };
