@@ -1,6 +1,26 @@
 // https://github.com/tess-tac-toe/tess-tac-toe.github.io
 // tic-tac-toe on tesseract (4 dimension cube)
 
+function play(id, player) {
+    if (typeof id !== "number" || id < 0 || id >= SIZE) {
+        return console.error("Invalid id ", id);
+    }
+
+    const values = getValues(),
+        xCount = values.filter(v => v === "X").length,
+        oCount = values.filter(v => v === "O").length;
+
+    if (values[id] !== "") {
+        return console.error("Already set");
+    }
+
+    if (!((player === "X" && xCount === oCount) || (player === "O" && xCount === oCount + 1))) {
+        return console.error("Player mismatch");
+    }
+
+    setValue(id, player);
+}
+
 function getStats(values = getValues()) {
     let xOptions = Array.from({ length: N }, () => ([])),
         oOptions = Array.from({ length: N }, () => ([])),
