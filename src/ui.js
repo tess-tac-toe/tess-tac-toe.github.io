@@ -60,7 +60,15 @@ function onClick({ target }) {
     checkWinner();
 }
 
+function getRootSize() {
+    if (N <= 3) { return 8.5; }
+    if (N === 4) { return 4.1; }
+    if (N === 5) { return 2.3; }
+    return 1.5;
+}
+
 const cells = render();
 document.addEventListener("click", onClick);
 
 navigator?.serviceWorker?.register('/sw.js');
+document.getElementById("vars").innerText = `:root { --size: ${getRootSize()}vmin; }`;

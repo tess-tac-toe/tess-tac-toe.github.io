@@ -1,4 +1,12 @@
-const N = 4, SIZE = N ** 4, SWAPS = buildSwaps(), CHECKS = buildChecks();
+
+
+const N = getN(), SIZE = N ** 4, SWAPS = buildSwaps(), CHECKS = buildChecks();
+
+function getN() {
+    const N = +(new URLSearchParams(location.search).get("size") || "4");
+
+    return Math.max(3, Math.min(7, N));
+}
 
 function vec2id([x, y, z, w]) {
     return x + N * (y + N * (z + N * w));

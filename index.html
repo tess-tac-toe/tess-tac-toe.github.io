@@ -4,6 +4,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style id="vars">
+        :root {
+            --size: 4.1vmin;
+        }
+    </style>
     <style>
         table.inner {
             border-collapse: collapse;
@@ -12,10 +17,10 @@
         }
 
         td.inner {
-            width: 4.1vmin;
-            height: 4.1vmin;
-            line-height: 4.1vmin;
-            font-size: 4.1vmin;
+            width: var(--size);
+            height: var(--size);
+            line-height: var(--size);
+            font-size: var(--size);
 
             padding: 0.5vmin;
             border: 1px solid #000;
